@@ -18,7 +18,7 @@ namespace xkpasswd.cli
                 while (--count > -1)
                 {
                     Console.WriteLine(generator().Generate());
-                    if (count % 5 == 0) Console.WriteLine();
+                    if (count % 5 == 0) { Console.WriteLine(); }
                 }
             }
             catch (Exception e)
@@ -33,14 +33,16 @@ namespace xkpasswd.cli
         public ValidationResult Validate(CommandContext context, CommandSettings settings)
         {
             if (settings is GenerateSettings gs && (gs.SettingsPath == null || File.Exists(gs.SettingsPath)))
+            {
                 return ValidationResult.Success();
+            }
 
             return ValidationResult.Error("invalid path was provided");
         }
 
         public async Task<int> Execute(CommandContext context, CommandSettings settings)
         {
-            if (settings is GenerateSettings gs) return await Execute(context, gs).ConfigureAwait(false);
+            if (settings is GenerateSettings gs) { return await Execute(context, gs).ConfigureAwait(false); }
 
             throw new NotSupportedException("Unsupported settings type");
         }
