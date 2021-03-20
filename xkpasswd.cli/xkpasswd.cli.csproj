@@ -3,11 +3,9 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
-        <PackageId>xkpasswd.cli</PackageId>
-        <PackageLicenseFile>../LICENSE</PackageLicenseFile>
-        <Description>password generator using XkPassword nuget package</Description>
-        <Authors>Ben Hefner</Authors>
-        <RepositoryUrl>https://github.com/thebhef/xkpaswd.cli</RepositoryUrl>
+        <AssemblyName>xkcl</AssemblyName>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <PublishSingleFile>true</PublishSingleFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,6 +21,9 @@
     <ItemGroup>
         <None Remove="default.json" />
         <EmbeddedResource Include="default.json" />
+        <None Update="xkpasswd.cli.nuspec">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>

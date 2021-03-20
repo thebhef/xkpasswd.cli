@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <metadata>
+        <id>xkpasswd.cli</id>
+        <title>xkpasswd.cli</title>
+        <version>1.0.0</version>
+        <description>XkPasswd-based passwor generator CLI.</description>
+        <projectUrl>https://github.com/thebhef/xkpasswd.cli</projectUrl>
+        <authors>Ben Hefner</authors>
+    </metadata>
+
+    <files>
+        <file src="xkcl.exe" target="tools"/>
+    </files>
+</package>

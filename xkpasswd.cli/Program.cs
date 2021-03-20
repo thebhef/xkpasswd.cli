@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
@@ -19,7 +20,7 @@ namespace xkpasswd.cli
                 .WriteTo.Debug()
                 .WriteTo.File(logFileName, rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true)
                 .CreateLogger();
-
+            
             var app = new CommandApp();
             var cts = new CancellationTokenSource();
             Console.CancelKeyPress += (_, _) => cts.Cancel();

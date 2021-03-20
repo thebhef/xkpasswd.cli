@@ -1,0 +1,33 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build -c Release --no-restore
+    - name: Test
+      run: dotnet test -c Release --no-build --verbosity normal
+    - name: Publish
+      run: dotnet publish -c Release -r win-x64
+    - name: Choco Package
+      uses: crazy-max/ghaction-chocolatey@v1
+      with:
+        args: pack xkpasswd.cli\bin\Release\net5.0\win-x64\publish\xkpasswd.cli.nuspec
+    - name: Push Package To hefnet.co
+      run: nuget push xkpasswd.cli.1.0.0.nupkg ${{ secrets.HEFNET_NUGET_API_KEY }} -Source https://nuget.hefnet.co/api/odata -NonInteractive 

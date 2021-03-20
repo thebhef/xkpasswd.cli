@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using Serilog;
 using XkPassword;
 
 namespace xkpasswd.cli
@@ -10,6 +11,8 @@ namespace xkpasswd.cli
     {
         public static Func<XkPasswd> FromJson(string jsonString)
         {
+            Log.Logger.Debug($"Deserializing input \r\n\"{jsonString}\r\n\"");
+
             var config = JsonConvert.DeserializeObject<XkPasswdConfiguration>(jsonString);
             var symbolAlphabet = new HashSet<char>(config.symbol_alphabet!);
             var separatorAlphabet = new HashSet<char>(config.separator_alphabet!);
@@ -21,7 +24,6 @@ namespace xkpasswd.cli
 
             XkPasswd? generator = null;
             return GetGenerator;
-
 
             XkPasswd GetGenerator()
             {
