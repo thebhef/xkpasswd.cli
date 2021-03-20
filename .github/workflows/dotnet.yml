@@ -24,7 +24,7 @@ jobs:
     - name: Test
       run: dotnet test -c Release --no-build --verbosity normal
     - name: Publish
-      run: dotnet publish -c Release -r win-x64
+      run: dotnet publish -c Release
     - name: Choco Package
       uses: crazy-max/ghaction-chocolatey@v1
       with:
