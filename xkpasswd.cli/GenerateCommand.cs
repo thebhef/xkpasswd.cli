@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using Serilog;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -23,6 +24,7 @@ namespace xkpasswd.cli
             }
             catch (Exception e)
             {
+                Log.Logger.Fatal(e, "Unhandled exception while generating passwords");
                 Console.WriteLine($"Fatal: {e}");
                 return -1;
             }
@@ -49,11 +51,14 @@ namespace xkpasswd.cli
 
         private async Task<string> LoadJsonAsync(string? path)
         {
+            Log.Logger.Debug($"Loading json from {path ?? "default"}");
             var assembly = Assembly.GetExecutingAssembly();
 
             var sr = path != null
                 ? File.OpenText(path)
                 : new StreamReader(assembly.GetManifestResourceStream("xkpasswd.cli.default.json")!);
+
+            Log.Logger.Debug("Opened stream, reading text and returning the contents");
             return await sr.ReadToEndAsync().ConfigureAwait(false);
         }
     }
