@@ -2,7 +2,6 @@
     <PropertyGroup>
         <LangVersion>9.0</LangVersion>
         <Nullable>enable</Nullable>
-        <AssemblyVersion>1.0.0</AssemblyVersion>
-        <ProductVersion>1.0.0-local.0</ProductVersion>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
     </PropertyGroup>
 </Project> 
