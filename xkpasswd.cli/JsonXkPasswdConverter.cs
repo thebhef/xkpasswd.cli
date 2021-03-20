@@ -11,11 +11,12 @@ namespace xkpasswd.cli
     {
         public static Func<XkPasswd> FromJson(string jsonString)
         {
-            Log.Logger.Debug($"Deserializing input \r\n\"{jsonString}\r\n\"");
+            Log.Logger.Debug("Creating XkPasswd factory from json");
 
             var config = JsonConvert.DeserializeObject<XkPasswdConfiguration>(jsonString);
             var symbolAlphabet = new HashSet<char>(config.symbol_alphabet!);
             var separatorAlphabet = new HashSet<char>(config.separator_alphabet!);
+
             var randomSource = GetRandomSource();
 
             var transform = Enum.TryParse<CaseTransformation>(config.case_transform, true, out var ct)
@@ -23,6 +24,8 @@ namespace xkpasswd.cli
                 : CaseTransformation.RandomWord;
 
             XkPasswd? generator = null;
+
+            Log.Logger.Debug("Factory method is set up");
             return GetGenerator;
 
             XkPasswd GetGenerator()

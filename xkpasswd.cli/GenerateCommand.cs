@@ -24,6 +24,7 @@ namespace xkpasswd.cli
             }
             catch (Exception e)
             {
+                Log.Logger.Fatal(e, "Unhandled exception while generating passwords");
                 Console.WriteLine($"Fatal: {e}");
                 return -1;
             }
