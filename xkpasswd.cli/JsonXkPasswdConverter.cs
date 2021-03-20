@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
-using Serilog;
 using XkPassword;
 
 namespace xkpasswd.cli
@@ -49,20 +48,6 @@ namespace xkpasswd.cli
             }
         }
 
-        private static void RandomDiagnostic(IRandomSource randomSource)
-        {
-            var iterations = 1000;
-            var coinFlipRatios = new List<double>();
-            while (iterations-- > -1)
-            {
-                var flips = Enumerable.Range(0, 200).Select(_ => randomSource.CoinFlip()).ToList();
-                var ratio = flips.Count(r => r) / (double) flips.Count;
-                coinFlipRatios.Add(ratio);
-                Log.Logger.Debug($"Coin toss ratio (true/total): {ratio:00.00%} true");
-            }
-
-            Log.Logger.Debug($"average {coinFlipRatios.Average():00.00%} true");
-        }
 
         private static char? GetCharacterOrRandom(string? configPaddingCharacter,
             HashSet<char> rvalSymbolAlphabet,
@@ -71,21 +56,6 @@ namespace xkpasswd.cli
                 ? c
                 : rvalSymbolAlphabet.ToList().ElementAt(randomSource.Next(0, rvalSymbolAlphabet.Count));
 
-        private static IRandomSource GetRandomSource()
-        {
-            var rval = new RandomSource();
-            RandomDiagnostic(rval);
-            return rval;
-        }
-
-        private class RandomSource : IRandomSource
-        {
-            private readonly Random _random = new((int) DateTimeOffset.Now.Ticks);
-
-            public int Next(int minValue, int maxValue) => _random.Next(minValue, maxValue);
-
-
-            public bool CoinFlip() => Next(0, 100) > 49;
-        }
+        private static IRandomSource GetRandomSource() => new RandomSource();
     }
 }
