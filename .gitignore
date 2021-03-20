@@ -1,3 +1,5 @@
 /.idea/.idea.xkpasswd.cli/.idea/
 /*/obj/
 /*/bin/
+/publish/
+*.nupkg

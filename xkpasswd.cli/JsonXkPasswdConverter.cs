@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using Serilog;
 using XkPassword;
 
 namespace xkpasswd.cli
@@ -10,9 +11,12 @@ namespace xkpasswd.cli
     {
         public static Func<XkPasswd> FromJson(string jsonString)
         {
+            Log.Logger.Debug("Creating XkPasswd factory from json");
+
             var config = JsonConvert.DeserializeObject<XkPasswdConfiguration>(jsonString);
             var symbolAlphabet = new HashSet<char>(config.symbol_alphabet!);
             var separatorAlphabet = new HashSet<char>(config.separator_alphabet!);
+
             var randomSource = GetRandomSource();
 
             var transform = Enum.TryParse<CaseTransformation>(config.case_transform, true, out var ct)
@@ -20,8 +24,9 @@ namespace xkpasswd.cli
                 : CaseTransformation.RandomWord;
 
             XkPasswd? generator = null;
-            return GetGenerator;
 
+            Log.Logger.Debug("Factory method is set up");
+            return GetGenerator;
 
             XkPasswd GetGenerator()
             {

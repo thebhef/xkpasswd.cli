@@ -7,6 +7,7 @@ ProjectSection(SolutionItems) = preProject
 	Directory.Build.props = Directory.Build.props
 	LICENSE = LICENSE
 	README.md = README.md
+	.gitignore = .gitignore
 EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.xkpasswd.cli", "Tests.xkpasswd.cli\Tests.xkpasswd.cli.csproj", "{7FBE31F0-5922-4DAA-A24F-517D4068BB2C}"

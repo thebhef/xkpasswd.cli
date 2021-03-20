@@ -19,8 +19,8 @@ namespace Tests.xkpasswd.cli
                 var flips = Enumerable.Range(0, 200).Select(_ => uut.CoinFlip()).ToList();
                 var ratio = flips.Count(r => r) / (double) flips.Count;
                 coinFlipRatios.Add(ratio);
-                Assert.True(ratio > 0.35, ratio.ToString("0.00%"));
-                Assert.True(ratio < 0.65, ratio.ToString("0.00%"));
+                Assert.True(ratio > 0.3, ratio.ToString("0.00%"));
+                Assert.True(ratio < 0.7, ratio.ToString("0.00%"));
             }
 
             var average = coinFlipRatios.Average();

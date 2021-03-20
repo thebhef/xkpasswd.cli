@@ -12,9 +12,8 @@ namespace xkpasswd.cli
         {
             var randomBytes = new byte[4];
             _random.GetNonZeroBytes(randomBytes);
-            var clippedMin = minValue == 0 ? 1 : minValue;
             var randomScale = BitConverter.ToUInt32(randomBytes) / (double) uint.MaxValue;
-            return (int) (randomScale * (maxValue - clippedMin) + clippedMin);
+            return (int) (randomScale * (maxValue - minValue) + minValue);
         }
 
 
