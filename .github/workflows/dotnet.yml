@@ -3,7 +3,7 @@ name: .NET
 on:
   push:
     branches: [ main ]
-    tags: '*'
+#    tags: 'v*' todo
   pull_request:
     branches: [ main ]
 
@@ -35,7 +35,7 @@ jobs:
           # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
           minor_pattern: "(MINOR)"
           # A string to determine the format of the version output
-          format: "${major}.${minor}.${patch}"
+          format: "${major}.${minor}.${patch}-main.${increment}"
           # Optional path to check for changes. If any changes are detected in the path the
           # 'changed' output will true. Enter multiple paths separated by spaces.
           change_path: "xkpasswd.cli"
@@ -45,33 +45,29 @@ jobs:
           # tags like 'v1.0.0' will be recognized.
           short_tags: false
           # If this is set to true, *every* commit will be treated as a new version.
-          bump_each_commit: true
-
-
+          bump_each_commit: false
+        
       - name: Get prerelease tag
-        if: ${{steps.branchName.onDefault}} == false
-        env:
-          prerelease-tag: -${{steps.branchName.outputs.head_ref_branch}}.${{ steps.versionInfo.outputs.increment }}
-          legacyNugetPrerelease-tag: -${{steps.branchName.outputs.head_ref_branch}}${{ steps.versionInfo.outputs.increment }}
-        run: echo "${{prerelease-tag}}" "${{legacyNugetPrereleaseTag}}"
-
-      - name: Get prerelease tag
-        if: ${{steps.branchName.onDefault}} == true
-        env:
-          prerelease-tag: ''
-          legacyNugetPrerelease-tag: ''
-        run: echo "empty tags"
-
-      - name: Get Prerelease Tag
-        env:
-          legacyNugetPrerelease-tag: -${{steps.branchName.outputs.head_ref_branch}}${{ steps.versionInfo.outputs.increment }}
-          prerelease-tag: -${{steps.branchName.outputs.head_ref_branch}}.${{ steps.versionInfo.outputs.increment }}
-          chocoPackageVersion: ${{ steps.versionInfo_nugetLegacy.outputs.version }} ${{ legacyNugetPrerelase-tag }}
-          assemblyInformationalVersion: ${{ steps.versionInfo.outputs.version }} ${{ prerelease-tag }}
-          assemblyFileVersion: ${{ steps.versionInfo.outputs.major }}.${{ steps.versionInfo.outputs.minor }}.${{ steps.versionInfo.outputs.patch }}.${{ steps.versionInfo.outputs.increment }}
-          assemblyVersion: ${{ steps.versionInfo.outputs.major }}.0.0.0
-        run: echo $env.chocoPackageVersion
-
+        id: preReleaseInfo
+        run: |
+          if ("${{ steps.branchName.outputs.is_default }}" -eq "true"){
+            echo "::set-output name=isPrerelease::true"
+            echo "::set-output name=prereleaseTag::-main.${{ steps.versionInfo.outputs.increment }}"
+            echo "::set-output name=legacyNugetPrereleaseTag::-main${{ steps.versionInfo.outputs.increment }}"            
+          } else {
+            echo "::set-output name=isPrerelease::true"
+            echo "::set-output name=prereleaseTag::-${{ steps.branchName.outputs.head_ref_branch }}.${{ steps.versionInfo.outputs.increment }}"
+            echo "::set-output name=legacyNugetPrereleaseTag::-${{ steps.branchName.outputs.head_ref_branch }}${{ steps.versionInfo.outputs.increment }}"
+          }
+        
+      - name: Get Versions
+        id: netVersions
+        run: |
+          echo "::set-output name=chocoPackageVersion::${{ steps.versionInfo.outputs.major }}.${{ steps.versionInfo.outputs.minor }}.${{ steps.versionInfo.outputs.patch }}-main${{ steps.versionInfo.outputs.increment }}"
+          echo "::set-output name=assemblyInformationalVersion::${{ steps.versionInfo.outputs.version }}"
+          echo "::set-output name=assemblyFileVersion::${{ steps.versionInfo.outputs.major }}.${{ steps.versionInfo.outputs.minor }}.${{ steps.versionInfo.outputs.patch }}.${{ steps.versionInfo.outputs.increment }}"
+          echo "::set-output name=assemblyVersion::${{ steps.versionInfo.outputs.major }}.0.0.0"
+          echo "::set-output name=tagVersion::v${{ steps.versionInfo.outputs.major }}.${{ steps.versionInfo.outputs.minor }}.${{ steps.versionInfo.outputs.patch }}+${{ steps.versionInfo.outputs.increment }}"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
@@ -80,14 +76,21 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build -c Release --no-restore /p:Version=${{ steps.versionInfo.outputs.major }}.0.0.0 /p:InformationalVersion=${{ steps.versionInfo.outputs.version }} /p:AssemblyFileVersion=${{ steps.versionInfo.outputs.major }}.${{ steps.versionInfo.outputs.minor }}.${{ steps.versionInfo.outputs.patch }}.${{ steps.versionInfo.outputs.increment }}
+        run: dotnet build -c Release --no-restore /p:Version=${{ steps.netVersions.outputs.assemblyVersion }} /p:InformationalVersion=${{ steps.netVersions.outputs.assemblyInformationalVersion }} /p:AssemblyFileVersion=${{ steps.netVersions.outputs.assemblyFileVersion }}
       - name: Test
         run: dotnet test -c Release --no-build --verbosity normal
       - name: Publish
-        run: dotnet publish -c Release /p:Version=${{ steps.versionInfo.outputs.major }}.0.0.0 /p:InformationalVersion=${{ steps.versionInfo.outputs.version }} /p:AssemblyFileVersion=${{ steps.versionInfo.outputs.major }}.${{ steps.versionInfo.outputs.minor }}.${{ steps.versionInfo.outputs.patch }}.${{ steps.versionInfo.outputs.increment }}
+        run: dotnet publish -c Release /p:Version=${{ steps.netVersions.outputs.assemblyVersion }} /p:InformationalVersion=${{ steps.netVersions.outputs.assemblyInformationalVersion }} /p:AssemblyFileVersion=${{ steps.netVersions.outputs.assemblyFileVersion }}
       - name: Choco Package
         uses: crazy-max/ghaction-chocolatey@v1
         with:
-          args: pack xkpasswd.cli\bin\Release\net5.0\win-x64\publish\xkpasswd.cli.nuspec --Version ${{ steps.versionInfo_nugetLegacy.outputs.version }}
+          args: pack xkpasswd.cli\bin\Release\net5.0\win-x64\publish\xkpasswd.cli.nuspec --Version ${{ steps.netVersions.outputs.chocoPackageVersion }}
       - name: Push Package To hefnet.co
-        run: nuget push xkpasswd.cli.${{ steps.versionInfo_nugetLegacy.outputs.version }}.nupkg ${{ secrets.HEFNET_NUGET_API_KEY }} -Source https://nuget.hefnet.co/api/odata -NonInteractive 
+        run: |
+          nuget push xkpasswd.cli.${{ steps.netVersions.outputs.chocoPackageVersion }}.nupkg ${{ secrets.HEFNET_NUGET_API_KEY }} -Source https://nuget.hefnet.co/api/odata -NonInteractive           
+      - name: Tag build
+        run: |
+          git tag ${{ steps.netVersions.outputs.tagVersion }}
+          git tag ${{ steps.netVersions.outputs.assemblyInformationalVersion }}
+          git push origin --follow-tags refs/tags/${{ steps.netVersions.outputs.tagVersion }}
+          git push origin --follow-tags refs/tags/${{ steps.netVersions.outputs.assemblyInformationalVersion }}
