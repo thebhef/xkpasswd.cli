@@ -65,7 +65,7 @@ jobs:
         run: |
           echo "::set-output name=chocoPackageVersion::${{ steps.versionInfo.outputs.version }}${{ steps.prereleaseInfo.outputs.legacyNugetPrereleaseTag }}"
           echo "::set-output name=assemblyInformationalVersion::${{ steps.versionInfo.outputs.version }}${{ steps.prereleaseInfo.outputs.prereleaseTag }}"
-          echo "::set-output name=assemblyFileVersion::prereleaseInfo.${{ steps.versionInfo.outputs.increment }}"
+          echo "::set-output name=assemblyFileVersion::${{ steps.versionInfo.outputs.version }}.${{ steps.versionInfo.outputs.increment }}"
           echo "::set-output name=assemblyVersion::${{ steps.versionInfo.outputs.major }}.0.0.0"
           echo "::set-output name=tagVersion::v${{ steps.versionInfo.outputs.version }}+${{ steps.versionInfo.outputs.increment }}"
 
