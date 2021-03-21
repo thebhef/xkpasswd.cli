@@ -18,7 +18,11 @@ jobs:
       with:
           ref: ${{ github.head_ref }}   # checkout the correct branch name
           fetch-depth: 0                # fetch the whole repo history
-    
+        
+    - name: Get branch names
+      id: branchName
+      uses: tj-actions/branch-names@v2.2
+
     - name: Git Semantic Version
       id: versionInfo
       uses: paulhatch/semantic-version@v4.0.1
@@ -31,7 +35,7 @@ jobs:
         # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
         minor_pattern: "(MINOR)"
         # A string to determine the format of the version output
-        format: "${major}.${minor}.${patch}-prerelease.${increment}"
+        format: "${major}.${minor}.${patch}"
         # Optional path to check for changes. If any changes are detected in the path the
         # 'changed' output will true. Enter multiple paths separated by spaces.
         change_path: "xkpasswd.cli"
@@ -42,42 +46,32 @@ jobs:
         short_tags: false
         # If this is set to true, *every* commit will be treated as a new version.
         bump_each_commit: true
+
+
+    - name: Get prerelease tag
+      if: ${{steps.branchName.onDefault}} == false
+      env:
+        prerelease-tag: -${{steps.branchName.outputs.head_ref_branch}}.${{ steps.versionInfo.outputs.increment }}
+        legacyNugetPrerelease-tag: -${{steps.branchName.outputs.head_ref_branch}}${{ steps.versionInfo.outputs.increment }}
+      run: echo "${{prerelease-tag}}" "${{legacyNugetPrereleaseTag}}"
+        
+    - name: Get prerelease tag
+      if: ${{steps.branchName.onDefault}} == true
+      env:
+        prerelease-tag: ''
+        legacyNugetPrerelease-tag: ''
+      run echo "empty tags"
     
-    - name: Git Semantic Version
-      id: versionInfo_nugetLegacy
-      uses: paulhatch/semantic-version@v4.0.1
-      with:
-        # The prefix to use to identify tags
-        tag_prefix: "v"
-        # A string which, if present in a git commit, indicates that a change represents a
-        # major (breaking) change, supports regular expressions wrapped with '/'
-        major_pattern: "(MAJOR)"
-        # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
-        minor_pattern: "(MINOR)"
-        # A string to determine the format of the version output
-        format: "${major}.${minor}.${patch}-prerelease${increment}"
-        # Optional path to check for changes. If any changes are detected in the path the
-        # 'changed' output will true. Enter multiple paths separated by spaces.
-        change_path: "xkpasswd.cli"
-        # Named version, will be used as suffix for name version tag
-        #namespace: project-b
-        # Indicate whether short tags like 'v1' should be supported. If false only full
-        # tags like 'v1.0.0' will be recognized.
-        short_tags: false
-        # If this is set to true, *every* commit will be treated as a new version.
-        bump_each_commit: true
+    - name: Get Prerelease Tag
+      env:
+        legacyNugetPrerelease-tag: -${{steps.branchName.outputs.head_ref_branch}}${{ steps.versionInfo.outputs.increment }}
+        prerelease-tag: -${{steps.branchName.outputs.head_ref_branch}}.${{ steps.versionInfo.outputs.increment }}
+        chocoPackageVersion: ${{ steps.versionInfo_nugetLegacy.outputs.version }} ${{ legacyNugetPrerelase-tag }}
+        assemblyInformationalVersion: ${{ steps.versionInfo.outputs.version }} ${{ prerelease-tag }}
+        assemblyFileVersion: ${{ steps.versionInfo.outputs.major }}.${{ steps.versionInfo.outputs.minor }}.${{ steps.versionInfo.outputs.patch }}.${{ steps.versionInfo.outputs.increment }}
+        assemblyVersion: ${{ steps.versionInfo.outputs.major }}.0.0.0
+      run: echo $env.chocoPackageVersion 
     
-    - name: Assembly Informational Version
-      run: echo ${{ steps.versionInfo.outputs.version }}
-      
-    - name: Choco Package Version
-      run: echo ${{ steps.versionInfo_nugetLegacy.outputs.version }}
-    
-    - name: Assembly File Version
-      run: echo ${{ steps.versionInfo.outputs.major }}.${{ steps.versionInfo.outputs.minor }}.${{ steps.versionInfo.outputs.patch }}.${{ steps.versionInfo.outputs.increment }}
-    
-    - name: Assembly Version
-      run: echo ${{ steps.versionInfo.outputs.major }}.0.0.0
     
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
