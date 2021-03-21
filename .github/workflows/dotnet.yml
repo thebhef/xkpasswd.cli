@@ -35,7 +35,7 @@ jobs:
           # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
           minor_pattern: "(MINOR)"
           # A string to determine the format of the version output
-          format: "${major}.${minor}.${patch}-main.${increment}"
+          format: "${major}.${minor}.${patch}"
           # Optional path to check for changes. If any changes are detected in the path the
           # 'changed' output will true. Enter multiple paths separated by spaces.
           change_path: "xkpasswd.cli"
@@ -48,7 +48,7 @@ jobs:
           bump_each_commit: false
         
       - name: Get prerelease tag
-        id: preReleaseInfo
+        id: prereleaseInfo
         run: |
           if ("${{ steps.branchName.outputs.is_default }}" -eq "true"){
             echo "::set-output name=isPrerelease::true"
@@ -63,11 +63,11 @@ jobs:
       - name: Get Versions
         id: netVersions
         run: |
-          echo "::set-output name=chocoPackageVersion::${{ steps.versionInfo.outputs.major }}.${{ steps.versionInfo.outputs.minor }}.${{ steps.versionInfo.outputs.patch }}-main${{ steps.versionInfo.outputs.increment }}"
-          echo "::set-output name=assemblyInformationalVersion::${{ steps.versionInfo.outputs.version }}"
-          echo "::set-output name=assemblyFileVersion::${{ steps.versionInfo.outputs.major }}.${{ steps.versionInfo.outputs.minor }}.${{ steps.versionInfo.outputs.patch }}.${{ steps.versionInfo.outputs.increment }}"
+          echo "::set-output name=chocoPackageVersion::${{ steps.versionInfo.outputs.version }}${{ steps.prereleaseInfo.outputs.legacyNugetPrereleaseTag }}"
+          echo "::set-output name=assemblyInformationalVersion::${{ steps.versionInfo.outputs.version }}${{ steps.prereleaseInfo.outputs.prereleaseTag }}"
+          echo "::set-output name=assemblyFileVersion::prereleaseInfo.${{ steps.versionInfo.outputs.increment }}"
           echo "::set-output name=assemblyVersion::${{ steps.versionInfo.outputs.major }}.0.0.0"
-          echo "::set-output name=tagVersion::v${{ steps.versionInfo.outputs.major }}.${{ steps.versionInfo.outputs.minor }}.${{ steps.versionInfo.outputs.patch }}+${{ steps.versionInfo.outputs.increment }}"
+          echo "::set-output name=tagVersion::v${{ steps.versionInfo.outputs.version }}+${{ steps.versionInfo.outputs.increment }}"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
