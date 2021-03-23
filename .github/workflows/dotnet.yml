@@ -85,12 +85,12 @@ jobs:
         uses: crazy-max/ghaction-chocolatey@v1
         with:
           args: pack xkpasswd.cli\bin\Release\net5.0\win-x64\publish\xkpasswd.cli.nuspec --Version ${{ steps.netVersions.outputs.chocoPackageVersion }}
-      - name: Push Package To hefnet.co
-        run: |
-          nuget push xkpasswd.cli.${{ steps.netVersions.outputs.chocoPackageVersion }}.nupkg ${{ secrets.HEFNET_NUGET_API_KEY }} -Source https://nuget.hefnet.co/api/odata -NonInteractive           
       - name: Tag build
         run: |
           git tag ${{ steps.netVersions.outputs.tagVersion }}
           git tag ${{ steps.netVersions.outputs.assemblyInformationalVersion }}
           git push origin --follow-tags refs/tags/${{ steps.netVersions.outputs.tagVersion }}
-          git push origin --follow-tags refs/tags/${{ steps.netVersions.outputs.assemblyInformationalVersion }}
+          git push origin --follow-tags refs/tags/${{ steps.netVersions.outputs.assemblyInformationalVersion }}          
+      - name: Push Package To hefnet.co
+        run: |
+          nuget push xkpasswd.cli.${{ steps.netVersions.outputs.chocoPackageVersion }}.nupkg ${{ secrets.HEFNET_NUGET_API_KEY }} -Source https://nuget.hefnet.co/api/odata -NonInteractive
