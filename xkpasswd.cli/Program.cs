@@ -25,11 +25,7 @@ namespace xkpasswd.cli
             var app = new CommandApp();
             var cts = new CancellationTokenSource();
             Console.CancelKeyPress += (_, _) => cts.Cancel();
-            app.Configure(config =>
-            {
-                config.AddCommand<GenerateCommand>("generate");
-                config.AddCommand<VersionCommand>("version");
-            });
+            app.Configure(config => { config.AddCommand<GenerateCommand>("generate"); });
             return await app.RunAsync(args.Any() ? args : new[] {"generate",}).ConfigureAwait(false);
         }
 
