@@ -34,11 +34,11 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build -c Release --no-restore /p:Version=${{ steps.gitversion.outputs.assemblySemVer }} /p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }} /p:FileVersion=${{ steps.netVersions.outputs.assemblySemFileVer }}
+        run: dotnet build -c Release --no-restore /p:Version=${{ steps.gitversion.outputs.assemblySemVer }} /p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }} /p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}
       - name: Test
         run: dotnet test -c Release --no-build
       - name: Publish
-        run: dotnet publish -c Release /p:Version=${{ steps.gitversion.outputs.assemblySemVer }} /p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }} /p:FileVersion=${{ steps.netVersions.outputs.assemblySemFileVer }}
+        run: dotnet publish -c Release /p:Version=${{ steps.gitversion.outputs.assemblySemVer }} /p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }} /p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}
       - name: Choco Package
         uses: crazy-max/ghaction-chocolatey@v1
         with:
