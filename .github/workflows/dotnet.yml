@@ -65,7 +65,7 @@ jobs:
         run: |
           echo "::set-output name=chocoPackageVersion::${{ steps.versionInfo.outputs.version }}${{ steps.prereleaseInfo.outputs.legacyNugetPrereleaseTag }}"
           echo "::set-output name=assemblyInformationalVersion::${{ steps.versionInfo.outputs.version }}${{ steps.prereleaseInfo.outputs.prereleaseTag }}"
-          echo "::set-output name=assemblyFileVersion::${{ steps.versionInfo.outputs.version }}.${{ steps.versionInfo.outputs.increment }}"
+          echo "::set-output name=fileVersion::${{ steps.versionInfo.outputs.version }}.${{ steps.versionInfo.outputs.increment }}"
           echo "::set-output name=assemblyVersion::${{ steps.versionInfo.outputs.major }}.0.0.0"
           echo "::set-output name=tagVersion::v${{ steps.versionInfo.outputs.version }}+${{ steps.versionInfo.outputs.increment }}"
 
@@ -76,11 +76,11 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build -c Release --no-restore /p:Version=${{ steps.netVersions.outputs.assemblyVersion }} /p:InformationalVersion=${{ steps.netVersions.outputs.assemblyInformationalVersion }} /p:AssemblyFileVersion=${{ steps.netVersions.outputs.assemblyFileVersion }}
+        run: dotnet build -c Release --no-restore /p:Version=${{ steps.netVersions.outputs.assemblyVersion }} /p:InformationalVersion=${{ steps.netVersions.outputs.assemblyInformationalVersion }} /p:FileVersion=${{ steps.netVersions.outputs.fileVersion }}
       - name: Test
         run: dotnet test -c Release --no-build --verbosity normal
       - name: Publish
-        run: dotnet publish -c Release /p:Version=${{ steps.netVersions.outputs.assemblyVersion }} /p:InformationalVersion=${{ steps.netVersions.outputs.assemblyInformationalVersion }} /p:AssemblyFileVersion=${{ steps.netVersions.outputs.assemblyFileVersion }}
+        run: dotnet publish -c Release /p:Version=${{ steps.netVersions.outputs.assemblyVersion }} /p:InformationalVersion=${{ steps.netVersions.outputs.assemblyInformationalVersion }} /p:FileVersion=${{ steps.netVersions.outputs.fileVersion }}
       - name: Choco Package
         uses: crazy-max/ghaction-chocolatey@v1
         with:
