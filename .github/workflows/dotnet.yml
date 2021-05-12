@@ -38,7 +38,7 @@ jobs:
       - name: Publish
         run: dotnet publish -c Release /p:Version=${{ steps.gitversion.outputs.assemblySemVer }} /p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }} /p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}
       - name: Choco Package
-        uses: crazy-max/ghaction-chocolatey@v1
+        uses: crazy-max/ghaction-chocolatey@v1.4.2
         with:
           args: pack xkpasswd.cli\bin\Release\net5.0\win-x64\publish\xkpasswd.cli.nuspec --Version ${{ steps.gitversion.outputs.nuGetVersion }}
       - name: Tag build
