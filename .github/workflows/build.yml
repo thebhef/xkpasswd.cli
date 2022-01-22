@@ -1,0 +1,87 @@
+name: Build
+
+on:
+  push:
+  pull_request: { }
+
+jobs:
+  calculate-version:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}   # checkout the correct branch name
+          fetch-depth: 0                # fetch the whole repo history
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.9
+        with:
+          versionSpec: '5.x'
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.9.9
+    outputs:
+      assemblyVersion: ${{steps.gitversion.outputs.assemblySemVer}}
+      semVer: ${{steps.gitversion.outputs.semVer}}
+      informationalVersion: ${{steps.gitversion.outputs.informationalVersion}}
+      fileVersion: ${{steps.gitversion.outputs.assemblySemFileVer}}
+      nuGetVersion: ${{steps.gitversion.outputs.nuGetVersion}}
+
+  test:
+    runs-on: windows-latest
+    needs: [ calculate-version ]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: |
+          dotnet build -c Release --no-restore /p:Version=${{ needs.calculate-version.outputs.assemblyVersion }} /p:InformationalVersion=${{ needs.calculate-version.outputs.informationalVersion }} /p:FileVersion=${{ needs.calculate-version.outputs.fileVersion }}
+
+      - name: Test
+        run: dotnet test -c Release --no-build
+
+  deploy:
+    runs-on: windows-latest
+    needs: [ calculate-version, test ]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+        
+      - name: Build
+        run: |
+          dotnet build -c Release --no-restore /p:Version=${{ needs.calculate-version.outputs.assemblyVersion }} /p:InformationalVersion=${{ needs.calculate-version.outputs.informationalVersion }} /p:FileVersion=${{ needs.calculate-version.outputs.fileVersion }}
+
+      - name: Publish
+        run: |
+          dotnet publish -c Release /p:Version=${{ needs.calculate-version.outputs.assemblyVersion }} /p:InformationalVersion=${{ needs.calculate-version.outputs.informationalVersion }} /p:FileVersion=${{ needs.calculate-version.outputs.fileVersion }}
+
+      - name: Choco Package
+        uses: crazy-max/ghaction-chocolatey@v1
+        with:
+          args: |
+            pack xkpasswd.cli\bin\Release\net5.0\win-x64\publish\xkpasswd.cli.nuspec --Version ${{needs.calculate-version.outputs.nuGetVersion }}
+
+      - name: Tag build
+        run: |
+          git tag v${{needs.calculate-version.outputs.semVer }}
+          git push origin  refs/tags/v${{needs.calculate-version.outputs.semVer }}
+
+      - name: Push Package
+        run: |
+          nuget push xkpasswd.cli.${{needs.calculate-version.outputs.nuGetVersion }}.nupkg ${{ secrets.NUGET_KEY }} -Source ${{ secrets.NUGET_DESTINATION }} -NonInteractive
