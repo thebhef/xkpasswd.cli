@@ -8,8 +8,4 @@
         <projectUrl>https://github.com/thebhef/xkpasswd.cli</projectUrl>
         <authors>Ben Hefner</authors>
     </metadata>
-
-    <files>
-        <file src="xkcl.exe" target="tools"/>
-    </files>
 </package>

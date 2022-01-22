@@ -37,7 +37,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0.x
+          dotnet-version: 6.0.x
 
       - name: Restore dependencies
         run: dotnet restore
@@ -58,7 +58,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0.x
+          dotnet-version: 6.0.x
 
       - name: Restore dependencies
         run: dotnet restore
@@ -67,15 +67,9 @@ jobs:
         run: |
           dotnet build -c Release --no-restore /p:Version=${{ needs.calculate-version.outputs.assemblyVersion }} /p:InformationalVersion=${{ needs.calculate-version.outputs.informationalVersion }} /p:FileVersion=${{ needs.calculate-version.outputs.fileVersion }}
 
-      - name: Publish
+      - name: Pack
         run: |
-          dotnet publish -c Release /p:Version=${{ needs.calculate-version.outputs.assemblyVersion }} /p:InformationalVersion=${{ needs.calculate-version.outputs.informationalVersion }} /p:FileVersion=${{ needs.calculate-version.outputs.fileVersion }}
-
-      - name: Choco Package
-        uses: crazy-max/ghaction-chocolatey@v1
-        with:
-          args: |
-            pack xkpasswd.cli\bin\Release\net5.0\win-x64\publish\xkpasswd.cli.nuspec --Version ${{needs.calculate-version.outputs.nuGetVersion }}
+          dotnet pack -c Release /p:Version=${{ needs.calculate-version.outputs.assemblyVersion }} /p:InformationalVersion=${{ needs.calculate-version.outputs.informationalVersion }} /p:FileVersion=${{ needs.calculate-version.outputs.fileVersion }}
 
       - name: Tag build
         run: |
@@ -84,4 +78,4 @@ jobs:
 
       - name: Push Package
         run: |
-          nuget push xkpasswd.cli.${{needs.calculate-version.outputs.nuGetVersion }}.nupkg ${{ secrets.NUGET_KEY }} -Source ${{ secrets.NUGET_DESTINATION }} -NonInteractive
+          nuget push ./xkpasswd.cli/nupkg/xkpasswd.cli.${{needs.calculate-version.outputs.nuGetVersion }}.nupkg ${{ secrets.NUGET_KEY }} -Source ${{ secrets.NUGET_DESTINATION }} -NonInteractive
