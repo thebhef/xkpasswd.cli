@@ -13,7 +13,7 @@ namespace xkpasswd.cli
         {
             Log.Logger.Debug("Creating XkPasswd factory from json");
 
-            var config = JsonConvert.DeserializeObject<XkPasswdConfiguration>(jsonString);
+            var config = JsonConvert.DeserializeObject<XkPasswdConfiguration>(jsonString) ?? throw new ArgumentException("Failed to deserialize config");
             var symbolAlphabet = new HashSet<char>(config.symbol_alphabet!);
             var separatorAlphabet = new HashSet<char>(config.separator_alphabet!);
 
