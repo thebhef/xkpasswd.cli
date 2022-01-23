@@ -3,9 +3,11 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
+        
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>xkcl</ToolCommandName>
         <PackageOutputPath>./nupkg</PackageOutputPath>
+        
         <DebugSymbols>true</DebugSymbols>
         <DebugType>embedded</DebugType>
     </PropertyGroup>
